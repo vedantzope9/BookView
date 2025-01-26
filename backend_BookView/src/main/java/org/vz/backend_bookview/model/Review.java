@@ -1,5 +1,6 @@
 package org.vz.backend_bookview.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,13 +19,15 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "userId" )
-    private Users userId;
+    private Users user_id;
 
     @ManyToOne
     @JoinColumn(name = "bookId")
-    private Book bookId;
+    private Book book_id;
 
     private double rating;
     private String comment;
-    private Date createdDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private Date created_date;
 }
