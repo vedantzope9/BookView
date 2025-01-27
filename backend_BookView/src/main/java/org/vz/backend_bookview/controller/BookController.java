@@ -23,7 +23,21 @@ public class BookController {
 
     @GetMapping("/book")
     public ResponseEntity<List<Book>> getBooks(){
-        List<Book> list= bookService.getBooks();
-        return new ResponseEntity<>(list , HttpStatus.OK);
+        return bookService.getBooks();
+    }
+
+    @GetMapping("/book/{id}")
+    public ResponseEntity<Book> getBookById(@PathVariable int id){
+        return bookService.getBookById(id);
+    }
+
+    @PostMapping("/book/{id}")
+    public  ResponseEntity<String> updateBook(@PathVariable int id,@RequestBody Book book){
+        return bookService.updateBook(id,book);
+    }
+
+    @DeleteMapping("/book/{id}")
+    public ResponseEntity<String> deleteBook(@PathVariable int id){
+        return bookService.deleteBook(id);
     }
 }

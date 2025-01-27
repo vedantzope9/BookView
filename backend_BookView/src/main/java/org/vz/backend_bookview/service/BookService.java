@@ -8,6 +8,7 @@ import org.vz.backend_bookview.model.Book;
 import org.vz.backend_bookview.repo.BookRepo;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -16,11 +17,71 @@ public class BookService {
     private BookRepo bookRepo;
 
     public ResponseEntity<String> addBook(Book book) {
-        bookRepo.save(book);
-        return new ResponseEntity<>("Book Added!" , HttpStatus.OK);
+        try {
+            bookRepo.save(book);
+            return new ResponseEntity<>("Book Added!", HttpStatus.OK);
+        }catch(Exception e){
+            return ResponseEntity.status(500).body("Failed to save book: " + e.getMessage());
+        }
     }
 
-    public List<Book> getBooks() {
-        return bookRepo.findAll();
+    public ResponseEntity<List<Book>> getBooks() {
+        try {
+            List<Book> list = bookRepo.findAll();
+            return ResponseEntity.ok(list);
+        }
+        catch (Exception e){
+            return new ResponseEntity("Failed to fetch!" +e.getMessage() , HttpStatus.BAD_REQUEST );
+        }
+    }
+
+    public ResponseEntity<Book> getBookById(int id) {
+        try{
+            Optional<Book> book =bookRepo.findById(id);
+            if(book.isPresent())
+                return ResponseEntity.ok(book.get());
+            else
+                return new ResponseEntity("Book not found!" , HttpStatus.NOT_FOUND);
+        }
+        catch (Exception e){
+            return new ResponseEntity("Failed to fetch!" +e.getMessage() , HttpStatus.BAD_REQUEST );
+        }
+    }
+
+    public ResponseEntity<String> updateBook(int id, Book book) {
+        try{
+            return bookRepo.findById(id).map(existingBook -> {
+                // Update the fields of the existing book
+                existingBook.setTitle(book.getTitle());
+                existingBook.setAuthor(book.getAuthor());
+                existingBook.setDescription(book.getDescription());
+                existingBook.setAverageRating(book.getAverageRating());
+                existingBook.setPublishedDate(book.getPublishedDate());
+                existingBook.setImageName(book.getImageName());
+                existingBook.setImageType(book.getImageType());
+                existingBook.setImageData(book.getImageData());
+
+                bookRepo.save(existingBook);
+
+                return ResponseEntity.ok("Book Updated!");
+            }).orElse(new ResponseEntity<>("Book not found!", HttpStatus.NOT_FOUND));
+        }
+        catch (Exception e){
+            return new ResponseEntity("Failed to update!" +e.getMessage() , HttpStatus.BAD_REQUEST );
+        }
+    }
+
+    public ResponseEntity<String> deleteBook(int id) {
+        try{
+            if(bookRepo.findById(id).isPresent()) {
+                bookRepo.deleteById(id);
+                return ResponseEntity.ok("Book Deleted!");
+            }
+            else
+                return new ResponseEntity("Book not present!" , HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e){
+            return new ResponseEntity("Failed to delete!" +e.getMessage() , HttpStatus.BAD_REQUEST );
+        }
     }
 }
