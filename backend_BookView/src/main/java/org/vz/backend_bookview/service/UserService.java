@@ -19,14 +19,21 @@ public class UserService {
 
     BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
-    public ResponseEntity<String> addUser(Users user) {
+    public ResponseEntity<Users> addUser(Users user) {
         try{
+            if (userRepo.existsByUsername(user.getUsername())) {
+                throw new Exception("Username already exists!");
+            }
+            if (userRepo.existsByEmail(user.getEmail())) {
+                throw new Exception("Email already exists!");
+            }
+
             user.setPassword(encoder.encode(user.getPassword()));
             userRepo.save(user);
-            return ResponseEntity.ok("User Added!");
+            return new ResponseEntity(user,HttpStatus.OK);
         }
         catch (Exception e){
-            return new ResponseEntity<>("Failed to add User!" + e.getMessage() , HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity("Failed to add User!" + e.getMessage() , HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
