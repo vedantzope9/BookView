@@ -3,6 +3,7 @@ package org.vz.backend_bookview.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.vz.backend_bookview.model.Book;
 import org.vz.backend_bookview.repo.BookRepo;
@@ -16,6 +17,7 @@ public class BookService {
     @Autowired
     private BookRepo bookRepo;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> addBook(Book book) {
         try {
             bookRepo.save(book);
@@ -48,6 +50,7 @@ public class BookService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateBook(int id, Book book) {
         try{
             return bookRepo.findById(id).map(existingBook -> {
@@ -71,6 +74,7 @@ public class BookService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteBook(int id) {
         try{
             if(bookRepo.findById(id).isPresent()) {

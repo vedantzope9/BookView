@@ -3,6 +3,7 @@ package org.vz.backend_bookview.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.vz.backend_bookview.model.Users;
@@ -37,6 +38,7 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Users>> getAllUsers() {
         try{
             List<Users> list=userRepo.findAll();
@@ -47,6 +49,7 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Users> getUsersById(int id) {
         try{
             Optional<Users> users=userRepo.findById(id);
@@ -60,6 +63,7 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity updateUsers(int id, Users user) {
 
         try{
@@ -82,6 +86,7 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteUsers(int id) {
         try {
             if(userRepo.findById(id).isPresent()){
