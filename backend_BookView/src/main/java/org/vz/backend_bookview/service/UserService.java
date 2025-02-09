@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.vz.backend_bookview.model.Users;
@@ -17,6 +20,12 @@ public class UserService {
 
     @Autowired
     UserRepo userRepo;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    JwtService jwtService;
 
     BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
@@ -99,5 +108,15 @@ public class UserService {
         catch (Exception e){
             return new ResponseEntity("Failed to delete!"+e.getMessage() , HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public String verify(Users user) {
+        Authentication auth =
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
+
+        if(auth.isAuthenticated())
+            return jwtService.generateToken(user.getUsername());
+
+        return "Fail";
     }
 }

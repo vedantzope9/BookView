@@ -16,7 +16,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/users")
-    public ResponseEntity<Users> addUser(@RequestBody Users user){
+    public ResponseEntity<Users> register(@RequestBody Users user){
         return userService.addUser(user);
     }
 
@@ -38,6 +38,11 @@ public class UserController {
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUsers(@PathVariable int id){
         return userService.deleteUsers(id);
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody Users user){
+        return userService.verify(user);
     }
 
 }
