@@ -15,13 +15,9 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "userId" )
-    private Users userId;
+    private int userId;
 
-    @ManyToOne
-    @JoinColumn(name = "bookId")
-    private Book bookId;
+    private int bookId;
 
     private double rating;
     private String comment;
@@ -29,7 +25,7 @@ public class Review {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date createdDate;
 
-    public Review(int id, Users userId, Book bookId, double rating, String comment, Date createdDate) {
+    public Review(int id, int userId, int bookId, double rating, String comment, Date createdDate) {
         this.id = id;
         this.userId = userId;
         this.bookId = bookId;
@@ -49,19 +45,19 @@ public class Review {
         this.id = id;
     }
 
-    public Users getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Users userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public Book getBookId() {
+    public int getBookId() {
         return bookId;
     }
 
-    public void setBookId(Book bookId) {
+    public void setBookId(int bookId) {
         this.bookId = bookId;
     }
 
