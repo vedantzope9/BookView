@@ -82,4 +82,18 @@ public class ReviewService {
             return new ResponseEntity("Failed to fetch!" +e.getMessage() , HttpStatus.BAD_REQUEST );
         }
     }
+
+    public ResponseEntity<Double> averageRating(int bookId) {
+        try{
+            double sum=reviewRepo.getSumOfRatingsByBookId(bookId);
+            int count=reviewRepo.getCountOfRatingsByBookId(bookId);
+
+            double rating = (double)sum/count ;
+
+            return new ResponseEntity<>(rating,HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity("Failed to fetch!" +e.getMessage() , HttpStatus.BAD_REQUEST );
+        }
+    }
 }
