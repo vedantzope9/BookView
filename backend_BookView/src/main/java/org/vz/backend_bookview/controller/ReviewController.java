@@ -37,10 +37,12 @@ public class ReviewController {
         return reviewService.deleteReview(id);
     }
 
-
-
     @GetMapping("/review/{bookId}/{id}")
     ResponseEntity<Review> getReviewById(@PathVariable int id){
         return reviewService.getReviewById(id);
+    }
+    @GetMapping("/review/{bookId}/averageRating")
+    ResponseEntity<Double> averageRating(@PathVariable int bookId){
+        return reviewService.averageRating(bookId);
     }
 }

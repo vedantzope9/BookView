@@ -31,7 +31,7 @@ public class SecurityConfig {
 
         return http.csrf(customiser -> customiser.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("api/users").permitAll()
+                        .requestMatchers("api/register" , "api/login").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler(customAccessDeniedHandler()))
