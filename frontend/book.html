@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookView - All Books</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* Book Page Styling */
+        .books-container {
+            margin-top: 100px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .books-container h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .book-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .book-card:hover {
+            transform: scale(1.05);
+        }
+
+        .book-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .book-info {
+            padding: 10px;
+        }
+
+        .book-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .book-author {
+            color: #ff5e62;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .book-rating {
+            color: gold;
+            font-size: 16px;
+        }
+
+        .book-description {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .book-date {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>📚 BookView</h1>
+        <nav>
+            <ul>
+                <li><a href="login.html">Home</a></li>
+                <li><a href="#">Books</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="login.html" class="btn-login">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="books-container">
+        <h2>📖 Explore Our Books</h2>
+        <div class="books-grid" id="books-grid">
+            <!-- Books will be loaded here dynamically -->
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 BookView | Share your book insights and discover new perspectives</p>
+    </footer>
+
+</body>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const booksGrid = document.getElementById("books-grid");
+
+        // ✅ Get JWT token from localStorage
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            alert("Please login first!");
+            window.location.href = "index.html"; // Redirect to login page
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8081/api/book", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`, // ✅ Send JWT Token
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Unauthorized access. Please login again.");
+            }
+
+            const books = await response.json();
+            books.forEach(book => {
+                const bookCard = document.createElement("div");
+                bookCard.classList.add("book-card");
+
+                // ✅ Convert Byte Array to Base64
+                const imageSrc = `data:${book.imageType};base64,${convertByteArrayToBase64(book.imageData)}`;
+
+                bookCard.innerHTML = `
+                <img src="${imageSrc}" alt="${book.title}">
+                <div class="book-info">
+                    <p class="book-title">${book.title}</p>
+                    <p class="book-author">By ${book.author}</p>
+                    <p class="book-rating">⭐ ${book.averageRating}</p>
+                    <p class="book-description">${book.description.substring(0, 100)}...</p>
+                    <p class="book-date">📅 Published: ${book.publishedDate}</p>
+                </div>
+            `;
+
+                booksGrid.appendChild(bookCard);
+            });
+        } catch (error) {
+            console.error("Error fetching books:", error);
+            booksGrid.innerHTML = "<p>Failed to load books. Please try again later.</p>";
+        }
+    });
+
+
+    function convertByteArrayToBase64(byteArray) {
+        return btoa(String.fromCharCode(...new Uint8Array(byteArray)));
+    }
+
+    // Convert Byte Array to Base64 for Image
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        let bytes = new Uint8Array(buffer);
+        let len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
+</script>
+
+</html>

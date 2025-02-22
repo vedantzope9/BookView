@@ -25,7 +25,8 @@
             flex-direction: column;
         }
 
-        #switch-register , #switch-login {
+        #switch-register,
+        #switch-login {
             color: #ff5e62;
             font-weight: bold;
             cursor: pointer;
@@ -33,7 +34,8 @@
             transition: color 0.3s ease-in-out;
         }
 
-        #switch-register::after ,  #switch-login::after{
+        #switch-register::after,
+        #switch-login::after {
             content: "";
             display: block;
             width: 100%;
@@ -46,15 +48,17 @@
             transition: transform 0.3s ease-in-out;
         }
 
-        #switch-register:hover , #switch-login:hover {
+        #switch-register:hover,
+        #switch-login:hover {
             color: #ff2e3e;
         }
 
-        #switch-register:hover::after , #switch-login:hover::after {
+        #switch-register:hover::after,
+        #switch-login:hover::after {
             transform: scaleX(1);
         }
 
-        .btn-login{
+        .btn-login {
             margin-right: 50px;
         }
 
@@ -252,7 +256,7 @@
 
     <section class="hero">
         <h2>Discover & Review Your Favorite Books</h2>
-        <p>Join our community and share your book insights</p>
+        <p>Share your book insights and discover new perspectives!</p>
         <button class="open-modal">Get Started</button>
     </section>
 
@@ -280,8 +284,7 @@
                         <option value="ADMIN">Admin</option>
                     </select>
 
-                    <input type="password" id="admin-password" placeholder="Admin Password"
-                        class="hidden">
+                    <input type="password" id="admin-password" placeholder="Admin Password" class="hidden">
 
                     <button type="submit">Register</button>
                     <p>Already have an account? <a href="login.html"><span id="switch-login">Login</span></a></p>
@@ -328,13 +331,15 @@
         const result = await response.text(); // JWT token or "Fail"
 
         if (response.ok && result !== "Fail") {
-            alert("Login successful!");
+           // alert("Login successful!");
             localStorage.setItem("jwtToken", result); // Store JWT token for future requests
-            window.location.href = "dashboard.html"; // Redirect user to the dashboard
+            window.location.href = "book.html";
         } else {
             alert("Invalid username or password!");
         }
     });
+
+
 
     document.getElementById("register-role").addEventListener("change", function () {
         const adminPasswordField = document.getElementById("admin-password");
@@ -361,23 +366,23 @@
 
         const result = await response.text();
         if (response.ok) {
-            alert("Registration successful!");
-            window.location.href = "login.html";
+            //alert("Registration successful!");
+            window.location.href = "book.html";
         } else {
             alert(result);
         }
     });
 
     document.querySelector(".btn-login").addEventListener("click", () => {
-    document.querySelector(".modal").style.display = "flex";
-    document.getElementById("login-form").classList.remove("hidden");
-    document.getElementById("register-form").classList.add("hidden");
-    document.getElementById("form-title").textContent = "Login";
-});
-document.querySelector("nav a[href='#']").addEventListener("click", (event) => {
-    event.preventDefault(); 
-    location.reload();
-});
+        document.querySelector(".modal").style.display = "flex";
+        document.getElementById("login-form").classList.remove("hidden");
+        document.getElementById("register-form").classList.add("hidden");
+        document.getElementById("form-title").textContent = "Login";
+    });
+    document.querySelector("nav a[href='#']").addEventListener("click", (event) => {
+        event.preventDefault();
+        location.reload();
+    });
 </script>
 
 </html>
