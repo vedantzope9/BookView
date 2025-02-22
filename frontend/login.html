@@ -25,7 +25,7 @@
             flex-direction: column;
         }
 
-        #switch-register {
+        #switch-register , #switch-login {
             color: #ff5e62;
             font-weight: bold;
             cursor: pointer;
@@ -33,7 +33,7 @@
             transition: color 0.3s ease-in-out;
         }
 
-        #switch-register::after {
+        #switch-register::after ,  #switch-login::after{
             content: "";
             display: block;
             width: 100%;
@@ -46,11 +46,11 @@
             transition: transform 0.3s ease-in-out;
         }
 
-        #switch-register:hover {
+        #switch-register:hover , #switch-login:hover {
             color: #ff2e3e;
         }
 
-        #switch-register:hover::after {
+        #switch-register:hover::after , #switch-login:hover::after {
             transform: scaleX(1);
         }
 
@@ -266,11 +266,22 @@
                 </form>
 
                 <form id="register-form" class="hidden">
+                    <h2>Register</h2>
                     <input type="text" id="register-username" placeholder="Username" required>
                     <input type="email" id="register-email" placeholder="Email" required>
                     <input type="password" id="register-password" placeholder="Password" required>
+
+                    <label for="register-role">Role</label>
+                    <select id="register-role" required>
+                        <option value="USER">User</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+
+                    <input type="password" id="admin-password" placeholder="Admin Password"
+                        class="hidden">
+
                     <button type="submit">Register</button>
-                    <p>Already have an account? <a href="login.html"><span id="switch-register">Login</span></a></p>
+                    <p>Already have an account? <a href="login.html"><span id="switch-login">Login</span></a></p>
                 </form>
             </div>
         </div>
@@ -282,47 +293,77 @@
 </body>
 <script>
     document.querySelector(".open-modal").addEventListener("click", () => {
-    document.querySelector(".modal").style.display = "flex";
-});
-
-document.querySelector(".close-modal").addEventListener("click", () => {
-    document.querySelector(".modal").style.display = "none";
-});
-
-document.getElementById("switch-register").addEventListener("click", () => {
-    document.getElementById("login-form").classList.add("hidden");
-    document.getElementById("register-form").classList.remove("hidden");
-    document.getElementById("form-title").textContent = "Register";
-});
-
-
-// 🔹 Handle Login Form Submission
-document.getElementById("login-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent page reload
-
-    const username = document.getElementById("login-username").value;
-    const password = document.getElementById("login-password").value;
-
-    const response = await fetch("http://localhost:8081/api/login", {  
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
+        document.querySelector(".modal").style.display = "flex";
     });
 
-    const result = await response.text(); // JWT token or "Fail"
+    document.querySelector(".close-modal").addEventListener("click", () => {
+        document.querySelector(".modal").style.display = "none";
+    });
 
-    if (response.ok && result !== "Fail") {
-        alert("Login successful!"); 
-        localStorage.setItem("jwtToken", result); // Store JWT token for future requests
-        window.location.href = "dashboard.html"; // Redirect user to the dashboard
-    } else {
-        alert("Invalid username or password!");
-    }
-});
+    document.getElementById("switch-register").addEventListener("click", () => {
+        document.getElementById("login-form").classList.add("hidden");
+        document.getElementById("register-form").classList.remove("hidden");
+        document.getElementById("form-title").textContent = "Register";
+    });
 
 
+    //Handle Login Form Submission
+    document.getElementById("login-form").addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent page reload
+
+        const username = document.getElementById("login-username").value;
+        const password = document.getElementById("login-password").value;
+
+        const response = await fetch("http://localhost:8081/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.text(); // JWT token or "Fail"
+
+        if (response.ok && result !== "Fail") {
+            alert("Login successful!");
+            localStorage.setItem("jwtToken", result); // Store JWT token for future requests
+            window.location.href = "dashboard.html"; // Redirect user to the dashboard
+        } else {
+            alert("Invalid username or password!");
+        }
+    });
+
+    document.getElementById("register-role").addEventListener("change", function () {
+        const adminPasswordField = document.getElementById("admin-password");
+        adminPasswordField.classList.toggle("hidden", this.value !== "ADMIN");
+    });
+
+    document.getElementById("register-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("register-username").value;
+        const email = document.getElementById("register-email").value;
+        const password = document.getElementById("register-password").value;
+        const role = document.getElementById("register-role").value;
+        const adminPassword = role === "ADMIN" ? document.getElementById("admin-password").value : null;
+
+        const requestData = { username, email, password, role };
+        if (adminPassword) requestData.adminPassword = adminPassword;
+
+        const response = await fetch("http://localhost:8081/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData)
+        });
+
+        const result = await response.text();
+        if (response.ok) {
+            alert("Registration successful!");
+            window.location.href = "login.html";
+        } else {
+            alert(result);
+        }
+    });
 </script>
 
 </html>
