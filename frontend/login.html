@@ -54,6 +54,10 @@
             transform: scaleX(1);
         }
 
+        .btn-login{
+            margin-right: 50px;
+        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -240,7 +244,6 @@
         <nav>
             <ul>
                 <li><a href="#">Home</a></li>
-                <li><a href="#">Reviews</a></li>
                 <li><a href="#">Contact</a></li>
                 <li><a href="#" class="btn-login">Login</a></li>
             </ul>
@@ -364,6 +367,17 @@
             alert(result);
         }
     });
+
+    document.querySelector(".btn-login").addEventListener("click", () => {
+    document.querySelector(".modal").style.display = "flex";
+    document.getElementById("login-form").classList.remove("hidden");
+    document.getElementById("register-form").classList.add("hidden");
+    document.getElementById("form-title").textContent = "Login";
+});
+document.querySelector("nav a[href='#']").addEventListener("click", (event) => {
+    event.preventDefault(); 
+    location.reload();
+});
 </script>
 
 </html>
