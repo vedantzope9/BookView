@@ -24,6 +24,9 @@ public class Users {
     @Column(nullable = false)
     private Role role;
 
+    @Transient  // This field won't be saved in the database
+    private String adminPassword=null;
+
     public Users(int userId, String username, String password, String email, Role role) {
         this.userId = userId;
         this.username = username;
@@ -41,6 +44,10 @@ public class Users {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getAdminPassword() {
+        return adminPassword;
     }
 
     public String getUsername() {

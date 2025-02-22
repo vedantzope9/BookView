@@ -1,6 +1,7 @@
 package org.vz.backend_bookview.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.vz.backend_bookview.model.Role;
 import org.vz.backend_bookview.model.Users;
 import org.vz.backend_bookview.repo.UserRepo;
 
@@ -27,10 +29,19 @@ public class UserService {
     @Autowired
     JwtService jwtService;
 
+    @Value("${ADMIN_SECRET}")
+    private String ADMIN_SECRET;
+
     BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
     public ResponseEntity<Users> addUser(Users user) {
         try{
+            if (user.getRole() == Role.ADMIN) {
+                if (user.getAdminPassword() == null || !user.getAdminPassword().equals(ADMIN_SECRET)) {
+                    return new ResponseEntity("Enter correct Admin Password!" , HttpStatus.FORBIDDEN);
+                }
+            }
+
             if (userRepo.existsByUsername(user.getUsername())) {
                 throw new Exception("Username already exists!");
             }
