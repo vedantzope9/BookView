@@ -328,11 +328,12 @@
             body: JSON.stringify({ username, password })
         });
 
-        const result = await response.text(); // JWT token or "Fail"
+        const result = await response.json(); 
 
         if (response.ok && result !== "Fail") {
            // alert("Login successful!");
-            localStorage.setItem("jwtToken", result); // Store JWT token for future requests
+            localStorage.setItem("jwtToken", result.token); // Store JWT token for future requests
+            localStorage.setItem("userRole", result.role);
             window.location.href = "book.html";
         } else {
             alert("Invalid username or password!");
