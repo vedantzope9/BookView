@@ -16,6 +16,9 @@ import org.vz.backend_bookview.repo.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+
 
 @Service
 public class UserService {
@@ -121,13 +124,26 @@ public class UserService {
         }
     }
 
-    public String verify(Users user) {
+    public ResponseEntity<Map<String, String>> verify(Users user) {
         Authentication auth =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
 
+        String result=null;
         if(auth.isAuthenticated())
-            return jwtService.generateToken(user.getUsername());
+            result= jwtService.generateToken(user.getUsername());
+        else
+            result="Fail";
 
-        return "Fail";
+        if ("Fail".equals(result)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid credentials"));
+        }
+
+        Users loggedInUser = userRepo.findByUsername(user.getUsername());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", result);
+        response.put("role", loggedInUser.getRole().name());
+
+        return ResponseEntity.ok(response);
     }
 }

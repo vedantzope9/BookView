@@ -7,6 +7,7 @@ import org.vz.backend_bookview.model.Users;
 import org.vz.backend_bookview.service.UserService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -41,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody Users user){
+    public ResponseEntity<Map<String, String>> login(@RequestBody Users user){
         return userService.verify(user);
     }
 
