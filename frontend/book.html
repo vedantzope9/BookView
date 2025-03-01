@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,6 +202,10 @@
             font-size: 20px;
             cursor: pointer;
         }
+        
+        .cancel-btn:hover {
+            background: #999;
+        }
 
         footer {
             margin-top: 50px;
@@ -256,6 +261,7 @@
                 <input type="date" id="publishedDate" required>
                 <input type="file" id="image" required>
                 <button type="submit">Add Book</button>
+                <button type="button" class="cancel-btn" id="cancel-btn">Cancel</button>
             </form>
         </div>
     </div>
@@ -280,10 +286,7 @@
             return;
         }
 
-        // ✅ Show "Add Book" button only for Admins
-        if (userRole === "ADMIN") {
-            addBookBtn.classList.remove("hidden");
-        }
+        
 
         // ✅ Load Books from API
         try {
@@ -333,10 +336,18 @@
 
         // ✅ Handle "Add Book" Modal
         addBookBtn.addEventListener("click", () => {
+            if (userRole === "USER") {
+                alert("⚠️ You do not have permission to add books.");
+                return;
+            }
             document.getElementById("add-book-modal").style.display = "flex";
         });
 
         document.getElementById("close-modal").addEventListener("click", () => {
+            document.getElementById("add-book-modal").style.display = "none";
+        });
+
+        document.getElementById("cancel-btn").addEventListener("click", () => {
             document.getElementById("add-book-modal").style.display = "none";
         });
 
@@ -366,11 +377,14 @@
                     body: formData
                 });
 
+                const result = await response.text();
+                console.log("Response:", result);
+
                 if (response.ok) {
                     alert("✅ Book added successfully!");
                     window.location.reload();
                 } else {
-                    alert("⚠️ Failed to add book.");
+                    alert("⚠️ Failed to add book." + result);
                 }
             } catch (error) {
                 console.error("Error adding book:", error);
