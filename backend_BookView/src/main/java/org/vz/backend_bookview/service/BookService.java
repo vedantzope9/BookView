@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.vz.backend_bookview.model.Book;
 import org.vz.backend_bookview.repo.BookRepo;
 
@@ -18,8 +19,12 @@ public class BookService {
     private BookRepo bookRepo;
 
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> addBook(Book book) {
+    public ResponseEntity<String> addBook(Book book , MultipartFile imageFile) {
         try {
+            book.setImageName(imageFile.getOriginalFilename());
+            book.setImageType(imageFile.getContentType());
+            book.setImageData(imageFile.getBytes());
+
             bookRepo.save(book);
             return new ResponseEntity<>("Book Added!", HttpStatus.OK);
         }catch(Exception e){
