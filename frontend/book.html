@@ -257,8 +257,8 @@
                 <input type="text" id="title" placeholder="Title" required>
                 <input type="text" id="author" placeholder="Author" required>
                 <textarea id="description" placeholder="Description" required></textarea>
-                <input type="number" id="rating" placeholder="Average Rating" required>
-                <input type="date" id="publishedDate" required>
+                <input type="number" id="rating" placeholder="Average-Rating (out of 10)" required>
+                <input type="date" id="publishedDate" placeholder="Published Date (dd-mm-yyyy)" required>
                 <input type="file" id="image" required>
                 <button type="submit">Add Book</button>
                 <button type="button" class="cancel-btn" id="cancel-btn">Cancel</button>
@@ -288,7 +288,7 @@
 
         
 
-        // ✅ Load Books from API
+        //Load Books from API
         try {
             const response = await fetch("http://localhost:8081/api/book", {
                 method: "GET",
@@ -334,7 +334,7 @@
             booksGrid.innerHTML = "<p>Failed to load books. Please try again later.</p>";
         }
 
-        // ✅ Handle "Add Book" Modal
+        // Handle "Add Book" Modal
         addBookBtn.addEventListener("click", () => {
             if (userRole === "USER") {
                 alert("⚠️ You do not have permission to add books.");
@@ -351,45 +351,71 @@
             document.getElementById("add-book-modal").style.display = "none";
         });
 
-        // ✅ Handle Book Submission
+        // Handle Book Submission
         document.getElementById("add-book-form").addEventListener("submit", async function (event) {
-            event.preventDefault();
+    event.preventDefault();
 
-            if (userRole !== "ADMIN") {
-                alert("⚠️ You do not have permission to add books.");
-                return;
-            }
+    const token = localStorage.getItem("jwtToken");
+    const userRole = localStorage.getItem("userRole");
 
-            const formData = new FormData();
-            formData.append("title", document.getElementById("title").value);
-            formData.append("author", document.getElementById("author").value);
-            formData.append("description", document.getElementById("description").value);
-            formData.append("averageRating", document.getElementById("rating").value);
-            formData.append("publishedDate", document.getElementById("publishedDate").value);
-            formData.append("image", document.getElementById("image").files[0]);
+    if (!token) {
+        alert("⚠️ Unauthorized! Please login first.");
+        window.location.href = "login.html";
+        return;
+    }
 
-            try {
-                const response = await fetch("http://localhost:8081/api/book", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: formData
-                });
+    if (userRole !== "ADMIN") {
+        alert("⚠️ You do not have permission to add books.");
+        return;
+    }
 
-                const result = await response.text();
-                console.log("Response:", result);
+    const bookData = {
+        title: document.getElementById("title").value,
+        author: document.getElementById("author").value,
+        description: document.getElementById("description").value,
+        averageRating: document.getElementById("rating").value,
+        publishedDate: document.getElementById("publishedDate").value
+    };
 
-                if (response.ok) {
-                    alert("✅ Book added successfully!");
-                    window.location.reload();
-                } else {
-                    alert("⚠️ Failed to add book." + result);
-                }
-            } catch (error) {
-                console.error("Error adding book:", error);
-            }
+    const imageFile = document.getElementById("image").files[0];
+
+    if (!bookData.title || !bookData.author || !bookData.description || !bookData.averageRating || !bookData.publishedDate || !imageFile) {
+        alert("⚠️ Please fill in all fields!");
+        return;
+    }
+
+    const bookBlob = new Blob([JSON.stringify(bookData)], { type: "application/json" });
+
+    
+    const formData = new FormData();
+    formData.append("book", bookBlob);  
+    formData.append("imageFile", imageFile);
+
+    console.log("📤 Sending Form Data:", formData);
+
+    try {
+        const response = await fetch("http://localhost:8081/api/book", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}` 
+            },
+            body: formData 
         });
+
+        const result = await response.text();
+        console.log("Response:", result); 
+
+        if (response.ok) {
+            alert("Book added successfully!");
+            window.location.reload();
+        } else {
+            alert("⚠️ Failed to add book: " + result);
+        }
+    } catch (error) {
+        console.error("Error adding book:", error);
+    }
+});
+
 
     });
 
