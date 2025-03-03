@@ -2,6 +2,7 @@ package org.vz.backend_bookview.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +36,17 @@ public class BookController {
     @PostMapping("/book/{id}")
     public  ResponseEntity<String> updateBook(@PathVariable int id,@RequestBody Book book){
         return bookService.updateBook(id,book);
+    }
+
+    @GetMapping("book/{id}/image")
+    public  ResponseEntity<byte[]> getImageByBookId(@PathVariable int bookId){
+        Book book=bookService.getBookById(bookId).getBody();
+
+        byte[] imageFile=book.getImageData();
+
+        return ResponseEntity.ok().contentType(MediaType
+                        .valueOf(book.getImageType()))
+                .body(imageFile);
     }
 
     @DeleteMapping("/book/{id}")
