@@ -202,7 +202,7 @@
             font-size: 20px;
             cursor: pointer;
         }
-        
+
         .cancel-btn:hover {
             background: #999;
         }
@@ -236,7 +236,7 @@
         <nav>
             <ul>
                 <li><a href="login.html">Home</a></li>
-                <li><a href="#">Books</a></li>
+                <li><a href="book.html">Books</a></li>
                 <li><a href="#">Contact</a></li>
                 <li><a href="login.html" class="btn-login">Login</a></li>
             </ul>
@@ -278,15 +278,13 @@
         const token = localStorage.getItem("jwtToken");
         const userRole = localStorage.getItem("userRole");
 
-        console.log("User Role:", userRole); // Debugging
+        console.log("User Role:", userRole);
 
         if (!token) {
             alert("Please login first!");
             window.location.href = "login.html";
             return;
         }
-
-        
 
         //Load Books from API
         try {
@@ -310,25 +308,44 @@
             }
 
             const books = await response.json();
-            books.forEach(book => {
-                const bookCard = document.createElement("div");
-                bookCard.classList.add("book-card");
 
-                const imageSrc = `data:${book.imageType};base64,${convertByteArrayToBase64(book.imageData)}`;
+            books.forEach(async book => {
+        const bookCard = document.createElement("div");
+        bookCard.classList.add("book-card");
+        bookCard.setAttribute("data-id", book.bookId); // Store book ID for click event
 
-                bookCard.innerHTML = `
-                    <img src="${imageSrc}" alt="${book.title}">
-                    <div class="book-info">
-                        <p class="book-title">${book.title}</p>
-                        <p class="book-author">By ${book.author}</p>
-                        <p class="book-rating">⭐ ${book.averageRating}</p>
-                        <p class="book-description">${book.description.substring(0, 100)}...</p>
-                        <p class="book-date">📅 Published: ${book.publishedDate}</p>
-                    </div>
-                `;
+        // Fetch image separately from backend
+        const imageResponse = await fetch(`http://localhost:8081/api/book/${book.bookId}/image`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
 
-                booksGrid.appendChild(bookCard);
-            });
+        let imageSrc = "default-placeholder.jpg"; // Default if image fails
+        if (imageResponse.ok) {
+            const imageBlob = await imageResponse.blob();
+            imageSrc = URL.createObjectURL(imageBlob);
+        }
+
+        bookCard.innerHTML = `
+        <img src="${imageSrc}" alt="${book.title}">
+        <div class="book-info">
+            <p class="book-title">${book.title}</p>
+            <p class="book-author">By ${book.author}</p>
+            <p class="book-rating">⭐ ${book.averageRating}</p>
+            <p class="book-description">${book.description.substring(0, 100)}...</p>
+            <p class="book-date">📅 Published: ${book.publishedDate}</p>
+        </div>
+    `;
+
+        // ✅ Clicking a book redirects to its details page
+        bookCard.addEventListener("click", () => {
+            window.location.href = `book-details.html?bookId=${book.bookId}`;
+        });
+
+        booksGrid.appendChild(bookCard);
+    });
+
+            
         } catch (error) {
             console.error("Error fetching books:", error);
             booksGrid.innerHTML = "<p>Failed to load books. Please try again later.</p>";
@@ -353,77 +370,73 @@
 
         // Handle Book Submission
         document.getElementById("add-book-form").addEventListener("submit", async function (event) {
-    event.preventDefault();
+            event.preventDefault();
 
-    const token = localStorage.getItem("jwtToken");
-    const userRole = localStorage.getItem("userRole");
+            const token = localStorage.getItem("jwtToken");
+            const userRole = localStorage.getItem("userRole");
 
-    if (!token) {
-        alert("⚠️ Unauthorized! Please login first.");
-        window.location.href = "login.html";
-        return;
-    }
+            if (!token) {
+                alert("⚠️ Unauthorized! Please login first.");
+                window.location.href = "login.html";
+                return;
+            }
 
-    if (userRole !== "ADMIN") {
-        alert("⚠️ You do not have permission to add books.");
-        return;
-    }
+            if (userRole !== "ADMIN") {
+                alert("⚠️ You do not have permission to add books.");
+                return;
+            }
 
-    const bookData = {
-        title: document.getElementById("title").value,
-        author: document.getElementById("author").value,
-        description: document.getElementById("description").value,
-        averageRating: document.getElementById("rating").value,
-        publishedDate: document.getElementById("publishedDate").value
-    };
+            const bookData = {
+                title: document.getElementById("title").value,
+                author: document.getElementById("author").value,
+                description: document.getElementById("description").value,
+                averageRating: document.getElementById("rating").value,
+                publishedDate: document.getElementById("publishedDate").value
+            };
 
-    const imageFile = document.getElementById("image").files[0];
+            const imageFile = document.getElementById("image").files[0];
 
-    if (!bookData.title || !bookData.author || !bookData.description || !bookData.averageRating || !bookData.publishedDate || !imageFile) {
-        alert("⚠️ Please fill in all fields!");
-        return;
-    }
+            if (!bookData.title || !bookData.author || !bookData.description || !bookData.averageRating || !bookData.publishedDate || !imageFile) {
+                alert("⚠️ Please fill in all fields!");
+                return;
+            }
 
-    const bookBlob = new Blob([JSON.stringify(bookData)], { type: "application/json" });
+            const bookBlob = new Blob([JSON.stringify(bookData)], { type: "application/json" });
 
-    
-    const formData = new FormData();
-    formData.append("book", bookBlob);  
-    formData.append("imageFile", imageFile);
+            const formData = new FormData();
+            formData.append("book", bookBlob);
+            formData.append("imageFile", imageFile);
 
-    console.log("📤 Sending Form Data:", formData);
+            console.log("📤 Sending Form Data:", formData);
 
-    try {
-        const response = await fetch("http://localhost:8081/api/book", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}` 
-            },
-            body: formData 
+            try {
+                const response = await fetch("http://localhost:8081/api/book", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.text();
+                console.log("Response:", result);
+
+                if (response.ok) {
+                    alert("Book added successfully!");
+                    window.location.reload();
+                } else {
+                    alert("⚠️ Failed to add book: " + result);
+                }
+            } catch (error) {
+                console.error("Error adding book:", error);
+            }
         });
-
-        const result = await response.text();
-        console.log("Response:", result); 
-
-        if (response.ok) {
-            alert("Book added successfully!");
-            window.location.reload();
-        } else {
-            alert("⚠️ Failed to add book: " + result);
-        }
-    } catch (error) {
-        console.error("Error adding book:", error);
-    }
-});
-
-
     });
 
-    // ✅ Convert Byte Array to Base64
     function convertByteArrayToBase64(byteArray) {
         return btoa(String.fromCharCode(...new Uint8Array(byteArray)));
     }
-</script>
 
+</script>
 
 </html>
