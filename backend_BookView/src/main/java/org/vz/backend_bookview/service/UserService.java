@@ -125,12 +125,14 @@ public class UserService {
     }
 
     public ResponseEntity<Map<String, String>> verify(Users user) {
+        Users loggedInUser=userRepo.getUsersByEmail(user.getEmail());
+
         Authentication auth =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loggedInUser.getUsername(),user.getPassword()));
 
         String result=null;
         if(auth.isAuthenticated())
-            result= jwtService.generateToken(user.getUsername());
+            result= jwtService.generateToken(loggedInUser.getUsername());
         else
             result="Fail";
 
@@ -138,11 +140,11 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid credentials"));
         }
 
-        Users loggedInUser = userRepo.findByUsername(user.getUsername());
 
         Map<String, String> response = new HashMap<>();
         response.put("token", result);
         response.put("role", loggedInUser.getRole().name());
+        response.put("userId" , Integer.toString(loggedInUser.getUserId()));
 
         return ResponseEntity.ok(response);
     }
