@@ -17,7 +17,6 @@
         body {
             background: linear-gradient(to right, #ff9a9e, #fad0c4);
             color: #333;
-            text-align: center;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -68,6 +67,13 @@
             align-items: flex-start;
             gap: 20px;
             flex-grow: 1;
+            flex-direction: column;
+        }
+
+        .book-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
         }
 
         .book-image-container {
@@ -77,7 +83,6 @@
 
         .book-image-container img {
             width: 250px;
-            /* Set a smaller image width */
             height: 350px;
             object-fit: cover;
             border-radius: 10px;
@@ -115,10 +120,56 @@
             color: white;
         }
 
+        .reviews-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .review {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f8f8;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .review p {
+            margin: 5px 0;
+        }
+
+        .add-review-form {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-review-form input,
+        .add-review-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .add-review-form button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         footer {
-            margin-top: 50px;
             padding: 20px;
             background: rgba(255, 255, 255, 0.9);
+            text-align: center;
             width: 100%;
             margin-top: auto;
         }
@@ -140,24 +191,35 @@
     </header>
 
     <div class="container">
-        <div class="book-image-container">
-            <img id="book-image" src="" alt="Book Image">
+        <div class="book-content">
+            <div class="book-image-container">
+                <img id="book-image" src="" alt="Book Image">
+            </div>
+
+            <div class="book-details">
+                <h2 id="book-title"></h2>
+                <p><strong>Author:</strong> <span id="book-author"></span></p>
+                <p><strong>Published:</strong> <span id="book-date"></span></p>
+                <p><strong>Description:</strong> <span id="book-description"></span></p>
+                <p><strong>Rating:</strong> <span id="book-rating"></span> ⭐</p>
+
+                <div class="admin-buttons">
+                    <button class="btn btn-update hidden" id="update-book">Update</button>
+                    <button class="btn btn-delete hidden" id="delete-book">Delete</button>
+                </div>
+            </div>
         </div>
 
-        <div class="book-details">
-            <h2 id="book-title"></h2>
-            <p><strong>Author:</strong> <span id="book-author"></span></p>
-            <p><strong>Published:</strong> <span id="book-date"></span></p>
-            <p><strong>Description:</strong> <span id="book-description"></span></p>
-            <p><strong>Rating:</strong> <span id="book-rating"></span> ⭐</p>
-
+        <div class="reviews-section">
             <h3>Reviews</h3>
             <div id="reviews-container"></div>
+        </div>
 
-            <div class="admin-buttons">
-                <button class="btn btn-update hidden" id="update-book">Update</button>
-                <button class="btn btn-delete hidden" id="delete-book">Delete</button>
-            </div>
+        <div class="add-review-form">
+            <h3>Add a Review</h3>
+            <input type="number" id="review-rating" placeholder="Rating (out of 10)" min="1" max="10" required>
+            <textarea id="review-comment" placeholder="Write your review here..." required></textarea>
+            <button id="submit-review">Submit Review</button>
         </div>
     </div>
 
@@ -170,6 +232,8 @@
             const params = new URLSearchParams(window.location.search);
             const bookId = params.get("bookId");
             const token = localStorage.getItem("jwtToken");
+
+            // Fetch and display book details and reviews...
             const userRole = localStorage.getItem("userRole");
 
             if (!token || !bookId) {
@@ -264,6 +328,33 @@
             //Handle Update (Redirect to Update Page)
             document.getElementById("update-book").addEventListener("click", () => {
                 window.location.href = `update-book.html?bookId=${bookId}`;
+            });
+
+            // Submit review
+            document.getElementById("submit-review").addEventListener("click", async () => {
+                const rating = document.getElementById("review-rating").value;
+                const comment = document.getElementById("review-comment").value;
+
+                const reviewData = {
+                    bookId: bookId,
+                    userId: localStorage.getItem("userId"),
+                    rating: rating,
+                    comment: comment,
+                    createdDate: new Date().toISOString()
+                };
+
+                const response = await fetch(`http://localhost:8081/api/review/${bookId}`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                    body: JSON.stringify(reviewData)
+                });
+
+                if (response.ok) {
+                    alert("Review added successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to add review.");
+                }
             });
         });
     </script>
