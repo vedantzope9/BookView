@@ -92,4 +92,18 @@ public class ReviewService {
             return new ResponseEntity("Failed to fetch!" +e.getMessage() , HttpStatus.BAD_REQUEST );
         }
     }
+
+    public ResponseEntity<Integer> countReviews() {
+        Integer count= reviewRepo.countReviews();
+        return ResponseEntity.ok(count);
+    }
+
+    public ResponseEntity<String> getUsernameByUserId(int userId) {
+        List<String> list=reviewRepo.getUsernameBuUserId(userId);
+        String username="";
+
+        if(!list.isEmpty())
+            username=list.get(0);
+        return ResponseEntity.ok(username);
+    }
 }

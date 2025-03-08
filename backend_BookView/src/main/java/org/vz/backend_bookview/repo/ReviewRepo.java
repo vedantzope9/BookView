@@ -13,4 +13,10 @@ public interface ReviewRepo extends JpaRepository<Review, Integer> {
     
     @Query("SELECT COALESCE(AVG(r.rating), 0) FROM Review r WHERE r.bookId = :bookId")
     Double getSumOfRatingsByBookId(@Param("bookId") int bookId);
+
+    @Query("SELECT COUNT(id) FROM Review ")
+    Integer countReviews();
+
+    @Query("SELECT  u.username FROM Review r , Users u where r.userId=u.userId and u.userId= :userId")
+    List<String> getUsernameBuUserId(@Param("userId") int userId);
 }

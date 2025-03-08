@@ -19,6 +19,7 @@ public class BookController {
     private BookService bookService;
 
     @PostMapping("/book")
+
     public ResponseEntity<String> addBook(@RequestPart Book book , @RequestPart MultipartFile imageFile){
         return bookService.addBook(book , imageFile);
     }
@@ -38,7 +39,7 @@ public class BookController {
         return bookService.updateBook(id,book);
     }
 
-    @GetMapping("book/{id}/image")
+    @GetMapping("book/{bookId}/image")
     public  ResponseEntity<byte[]> getImageByBookId(@PathVariable int bookId){
         Book book=bookService.getBookById(bookId).getBody();
 

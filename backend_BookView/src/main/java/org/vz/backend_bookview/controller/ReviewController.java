@@ -46,4 +46,14 @@ public class ReviewController {
     ResponseEntity<Double> averageRating(@PathVariable int bookId){
         return reviewService.averageRating(bookId);
     }
+
+    @GetMapping("/review/userName")
+    ResponseEntity<String> getUsernameByUserId(int userId){
+        return reviewService.getUsernameByUserId(userId);
+    }
+
+    @GetMapping("/review/count")
+    ResponseEntity<Integer> countReviews(){
+        return reviewService.countReviews();
+    }
 }
