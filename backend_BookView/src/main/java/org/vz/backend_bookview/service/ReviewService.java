@@ -99,7 +99,7 @@ public class ReviewService {
     }
 
     public ResponseEntity<String> getUsernameByUserId(int userId) {
-        List<String> list=reviewRepo.getUsernameBuUserId(userId);
+        List<String> list=reviewRepo.getUsernameByUserId(userId);
         String username="";
 
         if(!list.isEmpty())

@@ -320,6 +320,8 @@
         const email = document.getElementById("login-email").value;
         const password = document.getElementById("login-password").value;
 
+        console.log(email +" "+password);
+
         const response = await fetch("http://localhost:8081/api/login", {
             method: "POST",
             headers: {
