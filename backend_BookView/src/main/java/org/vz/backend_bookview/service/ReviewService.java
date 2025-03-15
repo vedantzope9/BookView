@@ -85,7 +85,7 @@ public class ReviewService {
 
     public ResponseEntity<Double> averageRating(int bookId) {
         try{
-            double rating = reviewRepo.getSumOfRatingsByBookId(bookId) ;
+            double rating = reviewRepo.getAvgOfRatingsByBookId(bookId) ;
             return new ResponseEntity<>(rating,HttpStatus.OK);
         }
         catch (Exception e){
@@ -93,8 +93,8 @@ public class ReviewService {
         }
     }
 
-    public ResponseEntity<Integer> countReviews() {
-        Integer count= reviewRepo.countReviews();
+    public ResponseEntity<Integer> countReviews(int bookId) {
+        Integer count= reviewRepo.countReviews(bookId);
         return ResponseEntity.ok(count);
     }
 

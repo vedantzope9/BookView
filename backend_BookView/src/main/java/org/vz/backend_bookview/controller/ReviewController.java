@@ -52,8 +52,8 @@ public class ReviewController {
         return reviewService.getUsernameByUserId(userId);
     }
 
-    @GetMapping("/review/count")
-    ResponseEntity<Integer> countReviews(){
-        return reviewService.countReviews();
+    @GetMapping("/review/count/{bookId}")
+    ResponseEntity<Integer> countReviews(@PathVariable int bookId){
+        return reviewService.countReviews(bookId);
     }
 }

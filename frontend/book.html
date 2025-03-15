@@ -310,42 +310,67 @@
             const books = await response.json();
 
             books.forEach(async book => {
-        const bookCard = document.createElement("div");
-        bookCard.classList.add("book-card");
-        bookCard.setAttribute("data-id", book.bookId); // Store book ID for click event
+                const bookCard = document.createElement("div");
+                bookCard.classList.add("book-card");
+                bookCard.setAttribute("data-id", book.bookId); // Store book ID for click event
 
-        // Fetch image separately from backend
-        const imageResponse = await fetch(`http://localhost:8081/api/book/${book.bookId}/image`, {
-            method: "GET",
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+                // Fetch image separately from backend
+                const imageResponse = await fetch(`http://localhost:8081/api/book/${book.bookId}/image`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
 
-        let imageSrc = "default-placeholder.jpg"; // Default if image fails
-        if (imageResponse.ok) {
-            const imageBlob = await imageResponse.blob();
-            imageSrc = URL.createObjectURL(imageBlob);
-        }
+                let imageSrc = "default-placeholder.jpg"; // Default if image fails
+                if (imageResponse.ok) {
+                    const imageBlob = await imageResponse.blob();
+                    imageSrc = URL.createObjectURL(imageBlob);
+                }
+                
+                //fetch average rating
+                const avgRating = await fetch(`http://localhost:8081/api/review/${book.bookId}/averageRating`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                let avg = 0; 
+                if (avgRating.ok) {
+                    avg = await avgRating.text();
+                }
 
-        bookCard.innerHTML = `
+                //fetch count of reviews by bookId
+                const countReviews = await fetch(`http://localhost:8081/api/review/count/${book.bookId}`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                let count = 0; 
+                if (countReviews.ok) {
+                    count = await countReviews.text();
+                }
+                
+                const totalReviews = parseInt(count, 10);  // Ensure count is an integer
+                const totalRatingSum = (parseFloat(avg) * totalReviews )+ book.averageRating; // Get total rating sum
+
+                const averageRating = (totalRatingSum / (totalReviews+1)).toFixed(2);
+
+                bookCard.innerHTML = `
         <img src="${imageSrc}" alt="${book.title}">
         <div class="book-info">
             <p class="book-title">${book.title}</p>
             <p class="book-author">By ${book.author}</p>
-            <p class="book-rating">⭐ ${book.averageRating}</p>
+            <p><span class="book-rating">⭐ ${averageRating}</span> &nbsp; (${count})</p>
             <p class="book-description">${book.description.substring(0, 100)}...</p>
             <p class="book-date">📅 Published: ${book.publishedDate}</p>
         </div>
     `;
 
-        //Clicking a book redirects to its details page
-        bookCard.addEventListener("click", () => {
-            window.location.href = `book-details.html?bookId=${book.bookId}`;
-        });
+                //Clicking a book redirects to its details page
+                bookCard.addEventListener("click", () => {
+                    window.location.href = `book-details.html?bookId=${book.bookId}`;
+                });
 
-        booksGrid.appendChild(bookCard);
-    });
+                booksGrid.appendChild(bookCard);
+            });
 
-            
+
         } catch (error) {
             console.error("Error fetching books:", error);
             booksGrid.innerHTML = "<p>Failed to load books. Please try again later.</p>";
